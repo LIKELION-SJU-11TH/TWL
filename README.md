@@ -1,6 +1,6 @@
 # TWL (Today We Learned)
 ## Repo 초기 세팅
-1. <code> 버튼을 눌러 HTTPS 링크를 복사합니다.
+1. CODE 버튼을 눌러 HTTPS 링크를 복사합니다.
 <img width="403" alt="스크린샷 2023-03-30 오후 11 07 06" src="https://user-images.githubusercontent.com/96824025/228886685-1d5632ac-b53b-43f4-b6c3-2b436f56b560.png">
 
 2. terminal을 이용해서 디렉토리를 생성하고 싶은 위치로 이동합니다.
