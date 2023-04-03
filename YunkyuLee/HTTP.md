@@ -29,28 +29,76 @@ HTTP Method란 클라이언트와 서버 사이에 이루어지는 요청과 응
   - TRACE : 대상 리소스에 대한 경로를 따라 메시지 루프백 테스트를 수행
 
 ---
-## - HTTP Status Code
+## - HTTP Status Code (상태 코드)
 
-- 100 : Continue (클라이언트로부터 일부 요청을 받았으며 나머지 정보를 계속 요청함)
+- 1xx (Information) : 조건부 응답
 
-- 200 : OK (요청이 성공적으로 수행되었음)
+  - 100 : Continue (클라이언트로부터 일부 요청을 받았으며 나머지 정보를 계속 요청함)
 
-- 201 : Created (PUT 메소드에 의해 원격지 서버에 파일 생성됨)
+- 2xx (Successful) : 성공
 
-- 202 : Accepted (웹 서버가 명령 수신함)
+  - 200 : OK (요청이 성공적으로 수행되었음)
 
-- 301 : Moved Permanently (요청 자원의 위치가 영구적으로 변경됨, Location 응답 헤더를 통해 자원의 변경된 URL 정보 전달)
+  - 201 : Created (PUT 메소드에 의해 원격지 서버에 파일 생성됨)
 
-- 302 : Found (요청 자원의 위치가 임시적으로 변경됨, Location 응답 헤더를 통해 자원의 변경된 URL 정보 전달)
+  - 202 : Accepted (웹 서버가 명령 수신함)
+  
+  - 203 : Non-Authoritative Information (요청이 성공적으로 수행 되었으나, 요청에 대한 검증이 되지 않음)
+  
+  - 204 : No Content (요청이 성공적으로 수행되었고, 응답 Payload에 보낼 데이터가 없음을 의미)
+  
+  - 205 : Reset Content (클라이언트가 컨텐츠를 재설정할 것을 요구)
+  
+  - 206 : Partial Content (서버가 GET 요청의 일부만 성공적으로 처리)
 
-- 304 : Not Modified (요청한 자원이 변경되지 않았으므로 클라이언트 로컬 캐시에 저장된 자원을 이용하라는 의미)
+- 3xx (Redirection) : 리다이렉션 완료
+  
+  - 300 : Multiple Choices (요청에 대해 하나 이상의 리소스가 존재함)
 
-- 400 : Bad Request (요청 메시지 문법 오류)
+  - 301 : Moved Permanently (요청 자원의 위치가 영구적으로 변경됨, Location 응답 헤더를 통해 자원의 변경된 URL 정보 전달)
 
-- 401 : Unauthorized (요청한 자원에 대한 인가 필요, 요청 자원을 실행하는데 필요한 적절한 권한이 없음을 의미)
+  - 302 : Found (요청 자원의 위치가 임시적으로 변경됨, Location 응답 헤더를 통해 자원의 변경된 URL 정보 전달)
+  
+  - 303 : See Other (요청한 리소스를 다른 url에서 GET 요청을 통해 얻어야 함)
 
-- 403 : Forbidden (요청한 자원에 대한 접근 차단)
+  - 304 : Not Modified (요청한 자원이 변경되지 않았으므로 클라이언트 로컬 캐시에 저장된 자원을 이용하라는 의미)
+  
+  - 307 : Temporary Redirect (302와 유사하며, 클라이언트는 HTTP 메소드를 유지한채 요청을 재송신할 필요가 있음을 의미)
+  
+  - 308 : Permanent Redirect (301과 유사하며, 클라이언트는 HTTP 메소드를 유지한채 요청을 재송신할 필요가 있음을 의미)
 
-- 404 : Not Found (요청한 자원이 존재하지 않음)
+- 4xx (Client Error) : 요청 오류
 
-- 500 : Internal Server Error (내부 서버 오류)
+  - 400 : Bad Request (요청 메시지 문법 오류)
+
+  - 401 : Unauthorized (요청한 자원에 대한 인가 필요, 요청 자원을 실행하는데 필요한 적절한 권한이 없음을 의미)
+
+  - 403 : Forbidden (요청한 자원에 대한 접근 차단)
+
+  - 404 : Not Found (요청한 자원이 존재하지 않음)
+  
+  - 405 : Method Not Allowed (현재 리소스에 맞지 않는 메서드를 사용했음)
+  
+  - 406 : No Acceptable (알맞은 컨텐츠 타입이 없음)
+  
+  - 408 : Request Timeout (요청에 대한 응답 시간을 초과함)
+  
+  - 409 : Conflict (요청이 현재 서버 상태와 충돌)
+  
+  - 412 : Precondition Failed (서버가 요청자가 요청 시 부과한 사전조건을 만족하지 않음)
+  
+  - 413 : Payload Too Large (요청이 너무 커서 서버가 처리할 수 없음)
+  
+  - 429 : Too many Requests (클라이언트가 지정된 시간에 너무 많은 요청을 보냄)
+
+- 5xx (Server Error) : 서버 오류
+
+  - 500 : Internal Server Error (내부 서버 오류)
+  
+  - 501 : Not Implemented (클라이언트 요청에 대한 서버의 응답 수행 기능이 없음)
+  
+  - 502 : Bad Gateway (서버가 Gateway로부터 잘못된 응답을 수신)
+  
+  - 503 : Service Unavailable (서버가 요청을 처리할 준비가 되지 않음)
+  
+  - 504 : Gateway Timeout (서버가 Gateway 역할을 수행 중이며, 한 서버가 액세스하고 있는 다른 서버에서 적시에 응답을 받지 못함)
