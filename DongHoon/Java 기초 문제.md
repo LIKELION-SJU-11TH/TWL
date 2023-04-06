@@ -14,7 +14,11 @@ public class Main {
         int b = num % 10;
         if (a == b)
         {
-            System.out.print("Yes! 10 자리와 1의 자리가 같습니다.");
+            System.out.print("Yes! 10의 자리와 1의 자리가 같습니다.");
+        }
+        else
+        {
+            System.out.print("No! 10의 자리와 1의 자리가 같지 않습니다.");
         }
     }
 }
@@ -26,7 +30,8 @@ public class Main {
 import java.lang.reflect.Array;
 import java.util.*;
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) 
+    {
         Scanner scanner = new Scanner(System.in);
         System.out.print("금액을 입력하시오>>");
         int money = scanner.nextInt();
@@ -36,13 +41,13 @@ public class Main {
         money = money % 10000;
         System.out.println("1000원 "+money/1000+"매");
         money = money % 1000;
-        System.out.println("100원 "+money/100+"매");
+        System.out.println("100원 "+money/100+"개");
         money = money % 100;
-        System.out.println("50원 "+money/50+"매");
+        System.out.println("50원 "+money/50+"개");
         money = money % 50;
-        System.out.println("10원 "+money/10+"매");
+        System.out.println("10원 "+money/10+"개");
         money = money % 10;
-        System.out.println("1원 "+money+"매");
+        System.out.println("1원 "+money+"개");
     }
 }
 ```
@@ -65,7 +70,7 @@ public class Main {
        y_2 = scanner.nextInt();
        r2 = scanner.nextInt();
        double result = Math.sqrt(Math.pow(x_1 - x_2, 2) + Math.pow(y_1 - y_2, 2));
-       if (r1 + r2 > result)
+       if (r1 + r2 >= result)
        {
            System.out.println("두 원은 겹친다");
        }
@@ -275,7 +280,7 @@ public class Main {
         for (int i = 0; i < n; i++)
         {
             int num = (int)(Math.random ()*100 + 1);
-            if (check[num + 1] == 0)
+            if (check[num - 1] == 0)
             {
                 arr[i] = num;
             }
