@@ -6,8 +6,8 @@
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security:2.7.8'          // Spring Security
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'                                    // Spring Json-Web-Token
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'                                    // Spring Json-Web-Token
 }
 ```
 
@@ -20,8 +20,6 @@ dependencies {
 2. User의 정보를 바탕으로 Access Token, Refresh Token 생성
 
 3. TokenDto를 통해 Access Token, Refresh Token 응답
-
-
 
 **인증 필요 요청**
 
@@ -41,8 +39,6 @@ dependencies {
 
 dependency로 spring security를 추가함에 따라 모든 API로 요청을 보낼 시 인증이 필요하다. 하지만 홈 화면, 로그인 페이지, 회원가입 페이지 등은 인증이 필요 없이 접근이 가능해야하기 때문에 SecurityConfig 클래스를 만들어 401 unauthorized 에러를 해결할 필요가 있다.
 
-
-
 ```java
 @EnableWebSecurity
 @Configuration
@@ -58,7 +54,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated();
     }
 }
-
 ```
 
 ---
@@ -94,6 +89,56 @@ public class PostJwtRes {
     private String refreshToken;
 }
 ```
+
+---
+
+## User Entity에 역할 추가
+
+```java
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "USER")
+public class User extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name", nullable = false, length = 10)
+    private String name;
+
+    @Column(name = "age", nullable = false)
+    private int age;
+
+    @Column(name = "email", nullable = false, length = 50)
+    private String email;
+
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.ROLE_USER;
+
+    public enum Role {
+        ROLE_USER,
+        ROLE_ADMIN
+    }
+
+    @Builder
+    public User (Long id, String name, int age, String email, String password) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.email = email;
+        this.password = password;
+    }
+
+}
+
+```
+
+Role 이라는 enum을 만들어 User, Admin 구분.
 
 ---
 
@@ -194,14 +239,11 @@ public class JwtUtils {
         }
     }
 }
-
 ```
 
 @Component : class를 Bean에 등록하기 위한 어노테이션
 
 @Value : application.properties 에서 값을 읽어오기
-
-
 
 #### JwtUtils Constructor
 
@@ -213,8 +255,6 @@ public JwtUtils(@Value("${jwt.secret}") String jwtSecret) {
 ```
 
 생성자 부분이다. 파라미트를 jwtSecret(jwt의 secret key)를 입력해 jwtSecret을 BASE64로 디코딩 한 후 byte[] 배열에 넣는다. 이후 새로운 SecretKey를 HMAC-SHA알고리즘을 이용해 만들어준다. (만약 key byte array의 길이가 256비트보다 짧으면 예외를 발생시킨다고 한다.)
-
-
 
 #### generateToken() - token 생성 메서드
 
@@ -263,8 +303,6 @@ Params : user의 idx와 role을 jwt 의 payload에 넣기 위해 userId, role을
 
 - compact() : JWT를 빌드하고 규칙에 따라 직렬화한다.
 
-
-
 #### getJwt()
 
 ```java
@@ -280,8 +318,6 @@ public String getJwt() {
 Return : 문자열 형태로 토큰을 반환.
 
 헤더에서 "X-ACCESS-TOKEN"이라는 이름을 가진 헤더의 Value를 빼온다.
-
-
 
 #### getUserId()
 
@@ -419,26 +455,24 @@ UsernamePasswordAuthenticationToken의 생성자를 보면 두 종류가 있음
 
 ```java
 public UsernamePasswordAuthenticationToken(Object principal, Object credentials) {
-		super(null);
-		this.principal = principal;
-		this.credentials = credentials;
-		setAuthenticated(false);
+        super(null);
+        this.principal = principal;
+        this.credentials = credentials;
+        setAuthenticated(false);
 
 
 public UsernamePasswordAuthenticationToken(Object principal, Object credentials,
-			Collection<? extends GrantedAuthority> authorities) {
-		super(authorities);
-		this.principal = principal;
-		this.credentials = credentials;
-		super.setAuthenticated(true); // must use super, as we override
-	}
+            Collection<? extends GrantedAuthority> authorities) {
+        super(authorities);
+        this.principal = principal;
+        this.credentials = credentials;
+        super.setAuthenticated(true); // must use super, as we override
+    }
 ```
 
 공통된 파라미터로는 principle, credentials이 입력되는데 principle는 사용자를 식별하는 주체로 보통 사용자 이름이나 아이디 등이 입력된다. credentials은 사용자의 인증 자격 증명을 입력하는 부분으로 보통 비밀번호가 입력이 된다.
 
 두번째 생성자에 있는 authorities는 사용자가 가지고 있는 권한 또는 역할 목록인데 이는 GrantedAuthority를 구현한 Collection의 형태로 입력하면 된다. 대표적으로 SimpleGrantedAuthority가 있다.
-
-
 
 첫번째 생성자를 이용할 시 `setAuthenticated(false)`에 의해 해당 Authentication 객체를 사용하여 인증된 작업을 수행 할 수 없고 또한 UsernamePasswordAuthenticationToken.class의 setAuthenticated()을 사용해서 바꾸더라도 예외가 발생하게 된다. 그러므로 인증 작업을 수행하기 위해 두번째 생성자를 사용할 수 있도록 하자.
 
@@ -447,11 +481,11 @@ public UsernamePasswordAuthenticationToken(Object principal, Object credentials,
 ```java
 //UsernamePasswordAuthenticationToken.class의 setAuthenticated 메서드
 @Override
-	public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-		Assert.isTrue(!isAuthenticated,
-				"Cannot set this token to trusted - use constructor which takes a GrantedAuthority list instead");
-		super.setAuthenticated(false);
-	}
+    public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+        Assert.isTrue(!isAuthenticated,
+                "Cannot set this token to trusted - use constructor which takes a GrantedAuthority list instead");
+        super.setAuthenticated(false);
+    }
 ```
 
 ##### 추가 설명) Filter 란?
@@ -467,10 +501,9 @@ OncePerRequestFilter
 Redirect가 있는 경우 여러번 Filter를 반복할 수 있다. 이런 문제를 해결하기 위해 OncePerRequestFilter가 나옴.
 
 ```java
-
 public class myFilter extends OncePerRequestFilter {
 
-    
+
     @Override
     protected void doFilterInternal(HttpServletRequest req
                                     , HttpServletResponse res
@@ -516,13 +549,3 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 }
 ```
-
-
-
-
-
-
-
-
-
-
