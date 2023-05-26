@@ -51,10 +51,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/user/signup").permitAll()
                 .antMatchers("/user/session-login").permitAll()
+                .antMatchers("/user/login").permitAll()
                 .anyRequest().authenticated();
     }
 }
 ```
+
+`.antMatchers("{URI}").permitAll()`를 통해 해당 URI에 요청이 들어왔을 때 인증 없이 요청을 보낼수 있도록 설정해주고 `.anyRequest().authenticated();`를 통해 나머지 주소에 대해서는 인증된 사용자만 요청을 보낼 수 있도록 해준다.
 
 ---
 
@@ -135,7 +138,6 @@ public class User extends BaseEntity {
     }
 
 }
-
 ```
 
 Role 이라는 enum을 만들어 User, Admin 구분.
@@ -519,7 +521,7 @@ public class myFilter extends OncePerRequestFilter {
 
 ---
 
-## WebSecurityConfig.class
+## WebSecurityConfig.class 변경
 
 Spring security의 환경설정을 구성하기 위한 클래스
 
@@ -549,3 +551,80 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 }
 ```
+
+`.addFilterBefore(new JwtFilter(jwtUtils, userRepository), UsernamePasswordAuthenticationFilter.class)`를 추가해 지정된 필터 앞에 커스텀 필터를 추가한다. 여기서는 직접 만든 JwtFilter가 UsernamePasswordAuthenticationFilter 앞에 추가된다.
+
+---
+
+## 수정 사항
+
+위에 코드는 UsernamePasswordAuthenticationToken를 발급하는데 userIdx, userRole를 파라미터로 넣고 권한을 입력하는 칸에는 null로 비워두어 그저 인증을 통과하는 것에만 신경썼다.
+
+이를  JwtUtil 클래스에서 getAuthentication() 메서드를 통해 Token을 생성하는 것으로 바꾸며 권한을 입력하는 칸에 권한을 List로 입력하는 형태로 바꾸었다.
+
+```java
+// JwtUtils.class에 추가한 getAuthentication 메서
+public Authentication getAuthentication(String accessToken) throws BaseException {
+        User user = userRepository.findById(getUserId(accessToken)).orElseThrow(() -> new BaseException(BaseResponseStatus.NON_EXIST_USER));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(user.getRole().toString()));
+        return new UsernamePasswordAuthenticationToken(getUserId(accessToken), "", authorities);
+    }
+```
+
+Params : Jwt토큰을 입력받는다.
+
+Return : UsernamePasswordAuthenticationToken을 반환한다.
+
+Jwt 토큰을 입력받아 그 안에서 유저의 Id를 뽑아 User를 검색해 User의 Role을 리스트에 넣어준다. UsernamePasswordAuthenticationToken에 세번째 파라미터로 입력되는 authorities부분은 GrantedAuthority를 구현한 타입이 인자로 있는 Collection만 입력될 수 있다. 그러므로 권한을 `new SimpleGrantedAuthority(user.getRole().toString())`객체를 생성하여 List에 넣어주었다.
+
+
+
+```java
+// JwtFilter.class 의 doFilterInternal 메서
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        List<String> uriList = Arrays.asList(
+                "/user/login",
+                "/user/signup");
+
+        // 1. Token이 필요 없는 경우.
+        // 2. Http Method 가 OPTIONS인 경우.
+        // - 1, 2와 같은 경우는 JWT토큰 확인하지 않음.
+        // OPTIONS ? : 브라우저가 서버에게 지원하는 옵션들을 미리 요청 하는 목적 (preflight)
+        if (uriList.contains(request.getRequestURI())
+                || request.getMethod().equalsIgnoreCase("OPTIONS")) {
+
+            if (uriList.contains(request.getRequestURI())) {
+                log.info("NO NEED TOKEN URI : {}", request.getRequestURI());
+            }
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            String token = jwtUtils.getJwt();
+
+            Authentication authentication = jwtUtils.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            filterChain.doFilter(request, response);
+
+        } catch (BaseException e) {
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json");
+            PrintWriter printWriter = response.getWriter();
+            BaseResponse<Object> baseResponse = new BaseResponse<>(e.getStatus());
+            String jsonRes = new ObjectMapper()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(baseResponse); // BaseResponse 를 JSON object 로 직접 변환 시킴.
+            printWriter.print(jsonRes);
+            printWriter.flush();
+            printWriter.close();
+        }
+    }
+```
+
+try구문 안이 바뀐 것을 확인할 수 있다. jwtUtils.getJwt()로 토큰을 가져온 이후 jwtUtils.getAuthentication()으로 토큰을 생성하는 것으로 바꾸었다.
