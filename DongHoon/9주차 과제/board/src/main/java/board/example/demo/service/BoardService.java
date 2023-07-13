@@ -1,11 +1,17 @@
 package board.example.demo.service;
 
 import board.example.demo.entity.Articles;
+import board.example.demo.entity.Image;
 import board.example.demo.model.PostDAO;
 import board.example.demo.model.PostDTO;
+import board.example.demo.util.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.List;
 @Service
 @Slf4j
@@ -13,7 +19,7 @@ import java.util.List;
 public class BoardService {
 
     private final PostDAO postDAO;
-
+    private final ImageUtil imageUtil;
     public void createPost(PostDTO postDto) {
         this.postDAO.createPost(postDto);
     }
@@ -44,5 +50,10 @@ public class BoardService {
         postDTO.setTitle(updatedArticle.getTitle());
         postDTO.setContent(updatedArticle.getContent());
         this.postDAO.updateArticle(article_id, postDTO);
+    }
+    //이미지
+
+    public void createPostWithImage(PostDTO postDto, List<MultipartFile> multipartFiles) throws Exception {
+
     }
 }

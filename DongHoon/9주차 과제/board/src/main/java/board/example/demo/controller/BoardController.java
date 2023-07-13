@@ -5,7 +5,14 @@ import board.example.demo.model.PostDTO;
 import board.example.demo.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 @RestController
 @RequiredArgsConstructor
@@ -50,5 +57,15 @@ public class BoardController {
     public void deletePost(@PathVariable("id") Long id)
     {
         this.boardService.deletePost(id);
+    }
+
+
+    //이미지 업로드
+
+    @PostMapping(value = "Image",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public void createPostWithImage(@RequestPart PostDTO postDTO,
+                                                 @RequestPart("files") List<MultipartFile> files) throws IOException {
+        this.boardService.createPostWithImage(postDTO, files);
     }
 }

@@ -1,12 +1,12 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url : jdbc:mysql://127.0.0.1:3306/bike
-    username: bikemanager
-    password: Dlehdgns0126!
+    url : jdbc:mysql://first-aws-db.cxmndmj2vbal.ap-northeast-2.rds.amazonaws.com:3306/aws
+    username: root
+    password: 12345678
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
