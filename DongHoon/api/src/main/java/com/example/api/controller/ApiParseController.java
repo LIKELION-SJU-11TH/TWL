@@ -29,17 +29,4 @@ public class ApiParseController {
         return this.apiService.showApi();
     }
 
-    @GetMapping("/{shared}")
-    public String ListApiWithShared(
-            @PathVariable("shared") int shared) {
-        return this.apiService.showApiSmallerThanShared(shared);
-    }
-
-    @GetMapping("/{latitude}/{longitude}")
-    public String nearestBikeStation(
-            @PathVariable("latitude") double latitude,
-            @PathVariable("longitude") double longitude) {
-        return this.apiService.findNearestBikeStation(latitude, longitude);
-
-    }
 }
