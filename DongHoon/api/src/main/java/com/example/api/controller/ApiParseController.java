@@ -17,7 +17,7 @@ public class ApiParseController {
                          @PathVariable("END_INDEX") String end) throws IOException{
 
         String baseUrl = "http://openapi.seoul.go.kr:8088";
-        String apiKey = "4f667a796a696d6839376342666769";
+        String apiKey = "57726b6a42696d6836364a585a6b64";
         String fileType = "json";
         String service = "bikeList";
         String apiUrl = String.format("%s/%s/%s/%s/%s/%s", baseUrl,apiKey, fileType, service, start, end);
